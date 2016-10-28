@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Example</title>
+	</head>
+	<body>
+		<% if (!user) { %>
+			<p>
+			<a href="/login">Log In</a>
+			</p>
+		<% } else { %>
+			<p>
+			<a href="/">Home</a> | 
+			<a href="/account">Account</a> | 
+			<a href="/logout">Log Out</a>
+			<h2>Hello, <%= user.displayName %>.</h2>
+			<a href="/account">Account Info</a></br>
+			<a href="/logout">Log Out</a>
+			</p>
+		<% } %>
+	</body>
+</html>
+
+
