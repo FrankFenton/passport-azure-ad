@@ -18,7 +18,7 @@ var chai = require('chai');
 var expect = chai.expect;
 
 const TEST_TIMEOUT = 30000; // 30 seconds
-const LOGIN_WAITING_TIME = 500; // 0.5 second
+const LOGIN_WAITING_TIME = 1000; // 1 second
 
 var stopService = (done) => {
   service.stop();
@@ -186,7 +186,7 @@ describe('oidc v1 positive test', function() {
     var arity = 2;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
     var server = require('./app/app')(implicit_config, {}, arity);
-    checkCorrectResult(driver, server, arity, stopService(done);
+    checkCorrectResult(driver, server, arity, stopService(done));
   }); 
 
 });
