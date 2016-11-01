@@ -8,6 +8,11 @@ var path = require('chromedriver').path;
 var service = new chrome.ServiceBuilder(path).build();
 chrome.setDefaultService(service);
 
+// config files
+var hybrid_config = require('./config_files/oidc_v1_config_hybrid_flow').creds;
+var code_config = require('./config_files/oidc_v1_config_code_flow').creds;
+var implicit_config = require('./config_files/oidc_v1_config_implicit_flow').creds;
+
 // set up chai testing tool
 var chai = require('chai');
 var expect = chai.expect;
@@ -68,87 +73,120 @@ var checkCorrectResult = (driver, server, arity, done) => {
 describe('oidc v1 positive test', function() {
   this.timeout(TEST_TIMEOUT);
 
+  /****************************************************************************
+   *  Test the verify function where passReqToCallback is false
+   *  We are using the hybrid flow
+   ***************************************************************************/
+
   it('should succeed with arity 8 for verify function', function(done) {
     var arity = 8;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 7 for verify function', function(done) {
     var arity = 7;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 6 for verify function', function(done) {
     var arity = 6;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   }); 
 
   it('should succeed with arity 4 for verify function', function(done) {
     var arity = 4;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 3 for verify function', function(done) {
     var arity = 3;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 2 for verify function', function(done) {
     var arity = 2;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   }); 
+
+  /****************************************************************************
+   *  Test the verify function where passReqToCallback is true
+   *  We are using the hybrid flow
+   ***************************************************************************/
 
   it('should succeed with arity 8 for verify function', function(done) {
     var arity = 8;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 7 for verify function', function(done) {
     var arity = 7;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 6 for verify function', function(done) {
     var arity = 6;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   }); 
 
   it('should succeed with arity 4 for verify function', function(done) {
     var arity = 4;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 3 for verify function', function(done) {
     var arity = 3;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    var server = require('./app/app')(hybrid_config, {}, arity);
     checkCorrectResult(driver, server, arity, done);
   });
 
   it('should succeed with arity 2 for verify function', function(done) {
     var arity = 2;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
-    checkCorrectResult(driver, server, arity, stopService(done));
+    var server = require('./app/app')(hybrid_config, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
   }); 
+
+  /****************************************************************************
+   *  Test authorization code flow
+   ***************************************************************************/
+
+  it('should succeed', function(done) {
+    var arity = 8;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(code_config, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  }); 
+
+  /****************************************************************************
+   *  Test implicit flow
+   ***************************************************************************/
+
+  it('should succeed', function(done) {
+    var arity = 2;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(implicit_config, {}, arity);
+    checkCorrectResult(driver, server, arity, stopService(done);
+  }); 
+
 });

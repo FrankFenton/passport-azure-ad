@@ -54,6 +54,10 @@ module.exports = function(strategyOptions, authenicateOptions, verifyFuncNumber)
     2: ['profile', 'done']
   };
 
+  // we choose the 'function(profile, done)' or 'function(req, profile, done)' for the default verify callback
+  if (!verifyFuncNumber)
+    verifyFuncNumber = 2;
+
   // the verify function helper 
   var verifyFuncHelper = function () {
     var args = {};
