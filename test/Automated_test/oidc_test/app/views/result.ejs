@@ -6,11 +6,10 @@
 <body>
   <% if (user) { %>
   <p id="status">succeeded</p>
-  <p id="iss"><%= user.iss %></p>
   <p id="sub"><%= user.sub %></p>
   <p id="access_token"><%= user.access_token %></p>
   <p id="refresh_token"><%= user.refresh_token %></p>
-  <p id="displayName"><%= user.profile.displayName %></p>
+  <p id="upn"><%= user.profile.upn %></p>
   <% } else { %>
   <p id="status">failed</p>
   <% } %>

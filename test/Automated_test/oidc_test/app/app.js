@@ -68,7 +68,8 @@ module.exports = function(strategyOptions, authenicateOptions, verifyFuncNumber)
       args.sub = args.profile.sub;
     args.access_token = args.access_token ? "exists" : "none";
     args.refresh_token = args.refresh_token ? "exists" : "none";
-    args.profile = args.profile ? args.profile : { displayName : 'none'};
+    args.profile = args.profile ? args.profile : { upn : 'none'};
+    console.log(args);
 
     findBySub(args.sub, (err, user) => {
       if (err)

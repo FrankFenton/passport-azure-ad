@@ -13,48 +13,97 @@ var chai = require('chai');
 var expect = chai.expect;
 
 const TEST_TIMEOUT = 30000; // 30 seconds
-const LOGIN_WAITING_TIME = 1000; // 1 second
+const LOGIN_WAITING_TIME = 500; // 0.5 second
+
+var checkCorrectResult = (driver, server, arity, done) => {
+  driver.get('http://localhost:3000/login')
+  //.then(() => { driver.findElement(By.xpath('/html/body/p/a')).click(); })
+  .then(() => { 
+    var usernamebox = driver.findElement(By.name('login'));
+    usernamebox.sendKeys('robot@sijun.onmicrosoft.com');
+    var passwordbox = driver.findElement(By.name('passwd'));
+    passwordbox.sendKeys('Tmp123456');
+    setTimeout(() => {
+      passwordbox.sendKeys(webdriver.Key.ENTER);
+    }, LOGIN_WAITING_TIME);
+  })
+  .then(() => {
+    driver.wait(until.titleIs('result'), 10000);
+    driver.findElement(By.id('status')).getText().then((text) => { 
+      expect(text).to.equal('succeeded');
+    });
+    driver.findElement(By.id('sub')).getText().then((text) => { 
+      expect(text).to.equal('J6hslv5qvTNd3LnvPC9rAK2rwqzhe4XVbAo7nCBizdo');
+    });
+    driver.findElement(By.id('upn')).getText().then((text) => {
+      // arity 3 means we are using function(iss, sub, done), so there is no profile.displayName
+      if (arity !== 3) 
+        expect(text).to.equal('robot@sijun.onmicrosoft.com');
+      else
+        expect(text).to.equal('none');
+    });
+    driver.findElement(By.id('access_token')).getText().then((text) => { 
+      if (arity >= 6)
+        expect(text).to.equal('exists');
+      else
+        expect(text).to.equal('none');
+    });
+    driver.findElement(By.id('refresh_token')).getText().then((text) => { 
+      if (arity >= 6)
+        expect(text).to.equal('exists');
+      else
+        expect(text).to.equal('none');
+      driver.manage().deleteAllCookies();
+      driver.quit();
+      server.close(done); 
+    });
+  });
+};
 
 describe('oidc v1 positive test', function() {
   this.timeout(TEST_TIMEOUT);
 
-  it('should succeed', function(done) {
-    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, 8);
+  var arity_array = [8, 7, 6, 4, 3, 2];
 
-    driver.get('http://localhost:3000')
-    .then(() => { driver.findElement(By.xpath('/html/body/p/a')).click(); })
-    .then(() => { 
-      var usernamebox = driver.findElement(By.name('login'));
-      usernamebox.sendKeys('robot@sijun.onmicrosoft.com');
-      var passwordbox = driver.findElement(By.name('passwd'));
-      passwordbox.sendKeys('Tmp123456');
-      setTimeout(() => {
-        passwordbox.sendKeys(webdriver.Key.ENTER);
-      }, LOGIN_WAITING_TIME);
-    })
-    .then(() => {
-      driver.wait(until.titleIs('result'), 10000);
-      driver.findElement(By.id('status')).getText().then((text) => { 
-        expect(text).to.equal('succeeded');
-      });
-      driver.findElement(By.id('sub')).getText().then((text) => { 
-        expect(text).to.equal('J6hslv5qvTNd3LnvPC9rAK2rwqzhe4XVbAo7nCBizdo');
-      });
-      driver.findElement(By.id('iss')).getText().then((text) => { 
-        expect(text).to.equal('https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/');
-      });
-      driver.findElement(By.id('displayName')).getText().then((text) => { 
-        expect(text).to.equal('robot 1');
-      });
-      driver.findElement(By.id('access_token')).getText().then((text) => { 
-        expect(text).to.equal('exists');
-      });
-      driver.findElement(By.id('refresh_token')).getText().then((text) => { 
-        expect(text).to.equal('exists');
-        driver.quit();
-        server.close(done); 
-      });
-    });
+  it('should succeed with arity 8 for verify function', function(done) {
+    var arity = 4;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
   });
+
+  it('should succeed with arity 7 for verify function', function(done) {
+    var arity = 7;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  });
+
+  it('should succeed with arity 6 for verify function', function(done) {
+    var arity = 6;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  }); 
+
+  it('should succeed with arity 4 for verify function', function(done) {
+    var arity = 4;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  });
+
+  it('should succeed with arity 3 for verify function', function(done) {
+    var arity = 3;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  });
+
+  it('should succeed with arity 2 for verify function', function(done) {
+    var arity = 2;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  }); 
 });
