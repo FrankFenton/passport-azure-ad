@@ -31,37 +31,103 @@ module.exports = function(strategyOptions, authenicateOptions, verifyFuncNumber)
   var methodOverride = require('method-override');
   var passport = require('passport');
   var OIDCStrategy = require('../../../../lib/index').OIDCStrategy;
+  var hasReq = strategyOptions.passReqToCallback;
 
   var users = []; 
-  var findByOid = function(oid, fn) {
+  var findBySub = function(sub, fn) {
     for (var i = 0, len = users.length; i < len; i++) {
       var user = users[i];
-      if (user.oid === oid)
+      if (user.sub === sub)
         return fn(null, user);
     }
     return fn(null, null);
   };
 
+  const verifyArityArgsMap = {
+    8: ['iss', 'sub', 'profile', 'jwtClaims', 'access_token', 'refresh_token', 'params', 'done'],
+    7: ['iss', 'sub', 'profile', 'access_token', 'refresh_token', 'params', 'done'],
+    6: ['iss', 'sub', 'profile', 'access_token', 'refresh_token', 'done'],
+    4: ['iss', 'sub', 'profile', 'done'],
+    3: ['iss', 'sub', 'done'],
+    2: ['profile', 'done']
+  };
 
-  var fun = (profile, done) => {
-    if (!profile.oid)
-      return done(new Error('No oid found'));
-    findByOid(profile.oid, (err, user) => {
+  // the verify function helper 
+  var verifyFuncHelper = function () {
+    var args = {};
+    var length = hasReq ? (arguments.length - 1) : arguments.length;
+
+    // save the stuff from arguments to args
+    if (verifyArityArgsMap[length]) {
+      for (let i = 0; i < length; i++)
+        args[verifyArityArgsMap[length][i]] = hasReq ? arguments[i+1] : arguments[i];
+    }
+
+    // normalize the result
+    if (length === 2)
+      args.sub = args.profile.sub;
+    args.access_token = args.access_token ? "exists" : "none";
+    args.refresh_token = args.refresh_token ? "exists" : "none";
+    args.profile = args.profile ? args.profile : { displayName : 'none'};
+
+    findBySub(args.sub, (err, user) => {
       if (err)
         return done(err);
       if (!user) {
-        users.push(profile);
-        return done(null, profile);
+        users.push(args);
+        return args.done(null, args);
       }
-      return done(null, user);
-    })
+      return args.done(null, user);
+    });
   };
 
-  var strategy = new OIDCStrategy(strategyOptions, fun);
+  // register all the possible verify functions
+  var funcs = {};
+  if (!hasReq) {
+    funcs[8] = function(iss, sub, profile, jwtClaims, access_token, refresh_token, params, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[7] = function(iss, sub, profile, access_token, refresh_token, params, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[6] = function(iss, sub, profile, access_token, refresh_token, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[4] = function(iss, sub, profile, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[3] = function(iss, sub, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[2] = function(profile, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+  } else {
+    funcs[8] = function(req, iss, sub, profile, jwtClaims, access_token, refresh_token, params, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[7] = function(req, iss, sub, profile, access_token, refresh_token, params, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[6] = function(req, iss, sub, profile, access_token, refresh_token, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[4] = function(req, iss, sub, profile, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[3] = function(req, iss, sub, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };
+    funcs[2] = function(req, profile, done) {
+      verifyFuncHelper.apply(null, arguments);
+    };    
+  }
+
+  var strategy = new OIDCStrategy(strategyOptions, funcs[verifyFuncNumber]);
   passport.use(strategy);
-  passport.serializeUser(function(user, done) { done(null, user.oid); });
-  passport.deserializeUser(function(oid, done) {
-    findByOid(oid, function (err, user) {
+  passport.serializeUser(function(user, done) { done(null, user.sub); });
+  passport.deserializeUser(function(sub, done) {
+    findBySub(sub, function (err, user) {
       done(err, user);
     });
   });

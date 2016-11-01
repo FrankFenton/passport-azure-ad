@@ -40,7 +40,7 @@ exports.creds = {
   scope: null,
 
   // Optional, 'error', 'warn' or 'info'
-  loggingLevel: 'info',
+  loggingLevel: null,
 
   // Optional. The lifetime of nonce in session, the default value is 3600 (seconds).
   nonceLifetime: null,

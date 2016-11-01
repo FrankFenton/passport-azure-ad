@@ -58,31 +58,3 @@ describe('oidc v1 positive test', function() {
     });
   });
 });
-
-describe('oidc v1 negative test: bad client secret', function() {
-  this.timeout(TEST_TIMEOUT);
-
-  it('should fail', function(done) {
-    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
-    var server = require('./app/app')(require('./config_files/oidc_v1_config_bad_clientsecret').creds, {}, 8);
-
-    driver.get('http://localhost:3000/login')
-    .then(() => { 
-      var usernamebox = driver.findElement(By.name('login'));
-      usernamebox.sendKeys('robot@sijun.onmicrosoft.com');
-      var passwordbox = driver.findElement(By.name('passwd'));
-      passwordbox.sendKeys('Tmp123456');
-      setTimeout(() => {
-        passwordbox.sendKeys(webdriver.Key.ENTER);
-      }, LOGIN_WAITING_TIME);
-    })
-    .then(() => {
-      driver.wait(until.titleIs('result'), 10000);
-      driver.findElement(By.id('status')).getText().then((text) => { 
-        expect(text).to.equal('failed');
-        driver.quit();
-        server.close(done);
-      });
-    });
-  });
-});

@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>result</title>
-	</head>
-	<body>
-		<% if (user) { %>
-		<p id="upn"><%= user._json.upn %></p>
-		<% } else { %>
-		<p id="upn">none</p>
-		<% } %>
-	</body>
+<head>
+  <title>result</title>
+</head>
+<body>
+  <% if (user) { %>
+  <p id="status">succeeded</p>
+  <p id="iss"><%= user.iss %></p>
+  <p id="sub"><%= user.sub %></p>
+  <p id="access_token"><%= user.access_token %></p>
+  <p id="refresh_token"><%= user.refresh_token %></p>
+  <p id="displayName"><%= user.profile.displayName %></p>
+  <% } else { %>
+  <p id="status">failed</p>
+  <% } %>
+</body>
 </html>
