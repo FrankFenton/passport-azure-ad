@@ -1,5 +1,10 @@
 
-// Set up selenium webdriver and chromedriver
+'use strict';
+
+/******************************************************************************
+ *  Testing tools setup
+ *****************************************************************************/
+
 var webdriver = require('selenium-webdriver');
 var By = require('selenium-webdriver').By;
 var until = require('selenium-webdriver').until;
@@ -8,7 +13,22 @@ var path = require('chromedriver').path;
 var service = new chrome.ServiceBuilder(path).build();
 chrome.setDefaultService(service);
 
-// config files
+var chai = require('chai');
+var expect = chai.expect;
+
+const TEST_TIMEOUT = 30000; // 30 seconds
+const LOGIN_WAITING_TIME = 1000; // 1 second
+
+var stopService = (done) => {
+  service.stop();
+  done();
+}; 
+
+/******************************************************************************
+ *  Tenant specific endpoint configurations
+ *****************************************************************************/
+
+// the template config file
 var config_template = {
   identityMetadata: 'https://login.microsoftonline.com/sijun.onmicrosoft.com/.well-known/openid-configuration', 
   clientID: '683ead13-3193-43f0-9677-d727c25a588f',
@@ -44,17 +64,41 @@ code_config.responseType = 'code';
 var implicit_config = JSON.parse(JSON.stringify(config_template));
 implicit_config.responseType = 'id_token';
 
-// set up chai testing tool
-var chai = require('chai');
-var expect = chai.expect;
+/******************************************************************************
+ *  Common endpoint configurations
+ *****************************************************************************/
 
-const TEST_TIMEOUT = 30000; // 30 seconds
-const LOGIN_WAITING_TIME = 1000; // 1 second
+// the template config file
+var config_template_common_endpoint = {
+  identityMetadata: 'https://login.microsoftonline.com/common/.well-known/openid-configuration', 
+  clientID: '683ead13-3193-43f0-9677-d727c25a588f',
+  responseType: 'code id_token', 
+  responseMode: 'form_post', 
+  redirectUrl: 'http://localhost:3000/auth/openid/return', 
+  allowHttpForRedirectUrl: true,
+  clientSecret: 'X8TynX/Jo06ZepNFgLNvwCu9gYK/HRj1sJn+P96spDw=', 
+  validateIssuer: true,
+  issuer: ['https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/'],
+  passReqToCallback: false,
+  scope: null,
+  loggingLevel: null,
+  nonceLifetime: null,
+};
 
-var stopService = (done) => {
-  service.stop();
-  done();
-}; 
+// hybrid flow config with 'code id_token'
+var hybrid_config_common_endpoint = config_template;
+
+// authorization flow config
+var code_config_common_endpoint = JSON.parse(JSON.stringify(config_template_common_endpoint));
+code_config_common_endpoint.responseType = 'code';
+
+// implicit flow config with 'id_token
+var implicit_config_common_endpoint = JSON.parse(JSON.stringify(config_template_common_endpoint));
+implicit_config_common_endpoint.responseType = 'id_token';
+
+/******************************************************************************
+ *  Result checking function
+ *****************************************************************************/
 
 var checkCorrectResult = (driver, server, arity, done) => {
   driver.get('http://localhost:3000/login')
@@ -100,6 +144,10 @@ var checkCorrectResult = (driver, server, arity, done) => {
     });
   });
 };
+
+/******************************************************************************
+ *  The test cases
+ *****************************************************************************/
 
 describe('oidc v1 positive test', function() {
   this.timeout(TEST_TIMEOUT);
@@ -228,6 +276,39 @@ describe('oidc v1 positive test', function() {
     var arity = 2;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
     var server = require('./app/app')(implicit_config, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  }); 
+
+  /****************************************************************************
+   *  Test hybrid flow with common endpoint
+   ***************************************************************************/
+
+  it('should succeed', function(done) {
+    var arity = 8;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(hybrid_config_common_endpoint, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  }); 
+
+  /****************************************************************************
+   *  Test authorization code flow with common endpoint
+   ***************************************************************************/
+
+  it('should succeed', function(done) {
+    var arity = 8;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(code_config_common_endpoint, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  }); 
+
+  /****************************************************************************
+   *  Test implicit flow with common endpoint
+   ***************************************************************************/
+
+  it('should succeed', function(done) {
+    var arity = 2;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(implicit_config_common_endpoint, {}, arity);
     checkCorrectResult(driver, server, arity, stopService(done));
   }); 
 
