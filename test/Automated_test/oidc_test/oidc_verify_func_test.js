@@ -15,6 +15,11 @@ var expect = chai.expect;
 const TEST_TIMEOUT = 30000; // 30 seconds
 const LOGIN_WAITING_TIME = 500; // 0.5 second
 
+var stopService = (done) => {
+  service.stop();
+  done();
+}; 
+
 var checkCorrectResult = (driver, server, arity, done) => {
   driver.get('http://localhost:3000/login')
   //.then(() => { driver.findElement(By.xpath('/html/body/p/a')).click(); })
@@ -103,5 +108,47 @@ describe('oidc v1 positive test', function() {
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
     var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
     checkCorrectResult(driver, server, arity, done);
+  }); 
+
+  it('should succeed with arity 8 for verify function', function(done) {
+    var arity = 8;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  });
+
+  it('should succeed with arity 7 for verify function', function(done) {
+    var arity = 7;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  });
+
+  it('should succeed with arity 6 for verify function', function(done) {
+    var arity = 6;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  }); 
+
+  it('should succeed with arity 4 for verify function', function(done) {
+    var arity = 4;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  });
+
+  it('should succeed with arity 3 for verify function', function(done) {
+    var arity = 3;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, done);
+  });
+
+  it('should succeed with arity 2 for verify function', function(done) {
+    var arity = 2;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(require('./config_files/oidc_v1_config_with_passReqToCallback').creds, {}, arity);
+    checkCorrectResult(driver, server, arity, stopService(done));
   }); 
 });
