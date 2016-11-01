@@ -23,6 +23,8 @@
 
 'use strict';
 
+var users = [];
+
 module.exports = function(strategyOptions, authenicateOptions, verifyFuncNumber) {
   var express = require('express');
   var cookieParser = require('cookie-parser');
@@ -33,7 +35,7 @@ module.exports = function(strategyOptions, authenicateOptions, verifyFuncNumber)
   var OIDCStrategy = require('../../../../lib/index').OIDCStrategy;
   var hasReq = strategyOptions.passReqToCallback;
 
-  var users = []; 
+  users = []; 
   var findBySub = function(sub, fn) {
     for (var i = 0, len = users.length; i < len; i++) {
       var user = users[i];
@@ -69,7 +71,6 @@ module.exports = function(strategyOptions, authenicateOptions, verifyFuncNumber)
     args.access_token = args.access_token ? "exists" : "none";
     args.refresh_token = args.refresh_token ? "exists" : "none";
     args.profile = args.profile ? args.profile : { upn : 'none'};
-    console.log(args);
 
     findBySub(args.sub, (err, user) => {
       if (err)

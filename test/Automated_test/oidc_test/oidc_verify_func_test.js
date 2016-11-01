@@ -63,10 +63,8 @@ var checkCorrectResult = (driver, server, arity, done) => {
 describe('oidc v1 positive test', function() {
   this.timeout(TEST_TIMEOUT);
 
-  var arity_array = [8, 7, 6, 4, 3, 2];
-
   it('should succeed with arity 8 for verify function', function(done) {
-    var arity = 4;
+    var arity = 8;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
     var server = require('./app/app')(require('./config_files/oidc_v1_config').creds, {}, arity);
     checkCorrectResult(driver, server, arity, done);
