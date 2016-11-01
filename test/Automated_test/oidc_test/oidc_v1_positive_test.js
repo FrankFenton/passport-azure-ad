@@ -96,13 +96,17 @@ code_config_common_endpoint.responseType = 'code';
 var implicit_config_common_endpoint = JSON.parse(JSON.stringify(config_template_common_endpoint));
 implicit_config_common_endpoint.responseType = 'id_token';
 
+// hybrid flow config with validateIssuer turned off and issuer value removed
+var config_common_endpoint_no_validateIssuer = JSON.parse(JSON.stringify(config_template_common_endpoint));
+config_common_endpoint_no_validateIssuer.validateIssuer = false;
+config_common_endpoint_no_validateIssuer.issuer = null;
+
 /******************************************************************************
  *  Result checking function
  *****************************************************************************/
 
 var checkCorrectResult = (driver, server, arity, done) => {
   driver.get('http://localhost:3000/login')
-  //.then(() => { driver.findElement(By.xpath('/html/body/p/a')).click(); })
   .then(() => { 
     var usernamebox = driver.findElement(By.name('login'));
     usernamebox.sendKeys('robot@sijun.onmicrosoft.com');
@@ -309,7 +313,17 @@ describe('oidc v1 positive test', function() {
     var arity = 2;
     var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
     var server = require('./app/app')(implicit_config_common_endpoint, {}, arity);
-    checkCorrectResult(driver, server, arity, stopService(done));
+    checkCorrectResult(driver, server, arity, done);
   }); 
 
+  /****************************************************************************
+   *  Test implicit flow with common endpoint
+   ***************************************************************************/
+
+  it('should succeed', function(done) {
+    var arity = 2;
+    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();
+    var server = require('./app/app')(config_common_endpoint_no_validateIssuer, {}, arity);
+    checkCorrectResult(driver, server, arity, stopService(done));
+  });
 });
